@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VT Smart Inspector</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+<!-- ========================================================== -->
+<!--  MAIN POPUP CONTAINER                                      -->
+<!-- ========================================================== -->
+<div class="popup-root">
+
+  <!-- HEADER -->
+  <header class="card glass header">
+    <div class="header-left">
+      <div class="logo-ring">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0" stop-color="#b3e5ff"/>
+              <stop offset="1" stop-color="#7c4dff"/>
+            </linearGradient>
+          </defs>
+          <circle cx="12" cy="12" r="9" fill="url(#g1)"></circle>
+          <path d="M8 12h8M12 8v8"
+            stroke="#022" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+        </svg>
+      </div>
+
+      <div class="title-block">
+        <div class="title">VirusTotal Smart Inspector</div>
+        <div class="subtitle">Inline VT ratings • Hover to inspect</div>
+      </div>
+    </div>
+
+    <button id="menuBtn" class="icon-btn">⋯</button>
+  </header>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="card glass main">
+
+    <!-- SEARCH BAR -->
+    <div class="search-wrap">
+      <input id="searchBox" class="search-input"
+             placeholder="Search IP / domain / URL / hash (inline results)" />
+      <div id="searchResults" class="search-results"></div>
+    </div>
+
+    <!-- RECENT LOOKUPS -->
+    <div class="section small">
+      <div class="section-head">
+        <div class="section-title">Recent Lookups</div>
+        <div class="section-sub">Last 5</div>
+      </div>
+
+      <div id="recentList" class="recent-list">
+        <div class="empty">No recent lookups yet.</div>
+      </div>
+
+      <button id="viewAllBtn" class="btn btn-secondary full" style="margin-top:12px">
+        View all history
+      </button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="note">Hover highlighted IOCs on any page to see VirusTotal inline.</div>
+  </main>
+
+  <footer class="card glass footer">
+    <div>Built for analysts — private & local</div>
+    <div>v1.0</div>
+  </footer>
+
+</div>
+
+
+<!-- ========================================================== -->
+<!-- FLOATING SETTINGS PANEL (NOT INSIDE popup-root!)           -->
+<!-- ========================================================== -->
+<div id="settingsPanel" class="settings-panel glass card" aria-hidden="true">
+
+  <div class="panel-header">
+    <div class="panel-title">Settings</div>
+    <button id="closeSettings" class="icon-btn small">✕</button>
+  </div>
+
+  <label class="label">VT API Key (v3)</label>
+  <input id="apiInput" class="input" type="password" placeholder="Paste key here">
+
+  <div class="actions">
+    <button id="saveBtn" class="btn btn-primary">Save</button>
+    <button id="testBtn" class="btn btn-ghost">Test</button>
+    <button id="clearBtn" class="btn btn-danger">Clear</button>
+  </div>
+
+  <div id="keyStatus" class="key-status">No key configured</div>
+
+  <div class="divider"></div>
+
+  <div class="toggle-row">
+    <label class="switch">
+      <input id="autoHighlightToggle" type="checkbox">
+      <span class="slider"></span>
+    </label>
+    <div class="toggle-label">Auto-highlight IOCs on pages</div>
+  </div>
+
+</div>
+
+
+<!-- Toast container -->
+<div id="toast-root"></div>
+
+<script src="popup.js"></script>
+
+</body>
+</html>
