@@ -1,0 +1,9 @@
+# Build & Distribution
+dist/
+*.zip
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

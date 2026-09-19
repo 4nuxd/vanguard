@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VirusTotal Smart Inspector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/styles.css" />
+</head>
+
+<body class="popup-page">
+
+<div class="popup-root">
+
+  <!-- ambient background lighting elements -->
+  <div class="glass-bg-glow"></div>
+
+  <!-- FROSTED GLASS HEADER -->
+  <header class="card glass-header">
+    <div class="header-left">
+      <div class="logo-orb">
+        <img src="../../icons/icon128.png" width="24" height="24" alt="Logo" class="logo-img" />
+      </div>
+      <div class="title-block">
+        <div class="title-row">
+          <span class="title">VirusTotal Inspector</span>
+          <span class="glass-badge">v2.0</span>
+        </div>
+      </div>
+    </div>
+
+    <button id="menuBtn" class="icon-btn" title="Settings">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-tabs">
+    <button id="tabQuickBtn" class="tab-btn active">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      Quick Lookup
+    </button>
+    <button id="tabBatchBtn" class="tab-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+      Batch Scanner
+    </button>
+  </nav>
+
+  <!-- TAB 1: QUICK LOOKUP -->
+  <main id="tabQuickContent" class="main tab-content active">
+
+    <!-- SEARCH BAR -->
+    <div class="search-wrap">
+      <div class="search-input-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </div>
+      <input id="searchBox" class="search-input" placeholder="IP, Domain, Hash, URL (e.g. 1.1.1[.]1)..." />
+      <div id="searchResults" class="search-results"></div>
+    </div>
+
+    <!-- RECENT LOOKUPS CARD -->
+    <div class="card section-card">
+      <div class="section-head">
+        <div class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Recent Lookups
+        </div>
+        <div class="section-sub">Last 5</div>
+      </div>
+
+      <div id="recentList" class="recent-list">
+        <div class="empty">No recent lookups yet.</div>
+      </div>
+
+      <button id="viewAllBtn" class="btn btn-gradient full" style="margin-top:14px">
+        View Full History & Threat Reports
+      </button>
+    </div>
+  </main>
+
+  <!-- TAB 2: BATCH SCANNER -->
+  <main id="tabBatchContent" class="main tab-content">
+    <div class="card section-card">
+      <div class="batch-intro">Paste logs, emails, or text block to extract and bulk scan IOCs:</div>
+      <div class="textarea-wrap">
+        <textarea id="batchInput" class="batch-textarea" placeholder="Paste server logs, tickets, or text block containing IPs, Domains, or Hashes..."></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button id="batchScanBtn" class="btn btn-gradient full">⚡ Extract & Scan All IOCs</button>
+        <button id="batchClearBtn" class="btn btn-ghost">Clear</button>
+      </div>
+
+      <div id="batchResults" class="batch-results" style="display:none;"></div>
+    </div>
+  </main>
+
+</div>
+
+
+<!-- FLOATING SETTINGS PANEL -->
+<div id="settingsPanel" class="settings-panel glass card" aria-hidden="true">
+
+  <div class="panel-header">
+    <div class="panel-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      Settings & API Config
+    </div>
+    <button id="closeSettings" class="icon-btn small">✕</button>
+  </div>
+
+  <div class="field-wrap">
+    <label class="label">VirusTotal API Key (v3)</label>
+    <div class="input-with-icon">
+      <input id="apiInput" class="input" type="password" placeholder="Paste your VirusTotal API key...">
+      <button id="togglePassBtn" class="eye-btn" type="button" title="Show/Hide Key">👁</button>
+    </div>
+  </div>
+
+  <div class="actions" style="margin-top:10px;">
+    <button id="saveBtn" class="btn btn-gradient">Save Key</button>
+    <button id="testBtn" class="btn btn-ghost">Test Key</button>
+    <button id="clearBtn" class="btn btn-danger">Clear</button>
+  </div>
+
+  <div id="keyStatus" class="key-status">No key configured</div>
+
+  <div class="divider"></div>
+
+  <div class="toggle-card">
+    <div class="toggle-row">
+      <label class="switch">
+        <input id="autoHighlightToggle" type="checkbox">
+        <span class="slider"></span>
+      </label>
+      <div class="toggle-title">Auto-highlight IOCs</div>
+    </div>
+  </div>
+
+  <div class="toggle-card" style="margin-top:8px;">
+    <div class="toggle-row">
+      <label class="switch">
+        <input id="skipPrivateToggle" type="checkbox">
+        <span class="slider"></span>
+      </label>
+      <div class="toggle-title">Skip RFC 1918 Private IPs</div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- Toast container -->
+<div id="toast-root"></div>
+
+<script src="popup.js"></script>
+
+</body>
+</html>

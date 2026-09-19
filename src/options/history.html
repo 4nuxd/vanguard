@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>VT Inspector - Threat Intelligence Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/styles.css" />
+  <style>
+    /* Full-Screen Dashboard Layout Overrides */
+    html, body {
+      width: 100% !important;
+      min-height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #050507 !important;
+      color: #ffffff !important;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    }
+
+    .dashboard-page {
+      width: 100%;
+      min-height: 100vh;
+      padding: 32px 40px;
+      box-sizing: border-box;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06), transparent 70%);
+    }
+
+    .dashboard-root {
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Top Dashboard Header */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      width: 100%;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
+    }
+    .brand-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .brand-text h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.4px; color: #ffffff; margin: 0; }
+    .brand-text p { font-size: 13px; color: rgba(255, 255, 255, 0.55); margin-top: 3px; }
+
+    /* Top KPI Metric Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+      width: 100%;
+    }
+    @media (max-width: 1024px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+
+    .metric-card {
+      padding: 20px 24px;
+      border-radius: 16px;
+      background: rgba(22, 22, 26, 0.8);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .metric-info { display: flex; flex-direction: column; gap: 6px; }
+    .metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; color: rgba(255, 255, 255, 0.5); }
+    .metric-value { font-size: 28px; font-weight: 800; color: #ffffff; }
+    .metric-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Action Toolbar */
+    .toolbar-card {
+      position: relative;
+      z-index: 100;
+      padding: 16px 20px;
+      border-radius: 16px;
+      background: rgba(22, 22, 26, 0.8);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .toolbar-left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex: 1;
+      min-width: 340px;
+      flex-wrap: wrap;
+    }
+    .toolbar-search {
+      flex: 1;
+      min-width: 260px;
+      padding: 11px 16px 11px 40px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .toolbar-search:focus {
+      outline: none;
+      border-color: #ffffff;
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
+    }
+
+    /* CUSTOM GLASSMORPHISM DROPDOWN COMPONENTS */
+    .custom-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .custom-dropdown-trigger {
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all .2s ease;
+    }
+    .custom-dropdown-trigger:hover {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.65);
+    }
+    .custom-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      width: 100%;
+      min-width: 100%;
+      box-sizing: border-box;
+      background: rgba(16, 16, 20, 0.98);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 12px;
+      padding: 6px;
+      z-index: 9999;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+      animation: fadeIn .18s ease-out;
+    }
+    .custom-dropdown-menu.show {
+      display: block;
+    }
+    .custom-dropdown-item {
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .custom-dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+    .custom-dropdown-item.active {
+      background: #ffffff;
+      color: #000000;
+      font-weight: 700;
+    }
+
+    .toolbar-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* History Grid */
+    .history-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+    .history-card {
+      padding: 18px;
+      border-radius: 14px;
+      background: rgba(22, 22, 26, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all .2s ease;
+    }
+    .history-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .ioc-title-wrap { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+    .ioc-name { font-weight: 700; font-size: 14px; word-break: break-all; color: #ffffff; font-family: 'JetBrains Mono', monospace; }
+    .ioc-meta { font-size: 11px; color: rgba(255, 255, 255, 0.45); }
+
+    .card-stats {
+      display: flex;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-lbl { font-size: 10px; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; font-weight: 700; }
+    .stat-val { font-size: 13px; font-weight: 800; color: #ffffff; }
+
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .card-tag { font-size: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff; padding: 3px 8px; border-radius: 5px; }
+
+    /* High-Tech Empty State */
+    .empty-state-card {
+      grid-column: 1 / -1;
+      padding: 70px 30px;
+      text-align: center;
+      border-radius: 18px;
+      background: rgba(22, 22, 26, 0.6);
+      backdrop-filter: blur(24px);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+    }
+    .empty-icon-wrap {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    .empty-title { font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; }
+    .empty-desc { font-size: 14px; color: rgba(255, 255, 255, 0.55); max-width: 520px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-page">
+    <div class="dashboard-root">
+
+      <!-- HEADER -->
+      <header class="dashboard-header">
+        <div class="header-brand">
+          <div class="brand-logo">
+            <img src="../../icons/icon128.png" alt="Logo" />
+          </div>
+          <div class="brand-text">
+            <h1>Threat Intelligence Dashboard</h1>
+            <p>Local Cache Repository & Incident Reports</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- METRICS KPI CARDS -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-info">
+            <span class="metric-label">Total Recorded Lookups</span>
+            <span id="metricTotal" class="metric-value">0</span>
+          </div>
+          <div class="metric-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <span class="metric-label">Malicious Flagged</span>
+            <span id="metricMalicious" class="metric-value" style="color:#ff6b6b">0</span>
+          </div>
+          <div class="metric-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <span class="metric-label">Suspicious IOCs</span>
+            <span id="metricSuspicious" class="metric-value" style="color:#ffc107">0</span>
+          </div>
+          <div class="metric-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffc107" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <span class="metric-label">Clean / Harmless</span>
+            <span id="metricClean" class="metric-value" style="color:#69f0ae">0</span>
+          </div>
+          <div class="metric-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#69f0ae" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ACTION TOOLBAR WITH CUSTOM GLASS DROPDOWNS -->
+      <div class="toolbar-card">
+        <div class="toolbar-left">
+          <div style="position:relative;flex:1;min-width:240px;">
+            <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <input id="searchBox" class="toolbar-search" placeholder="Search by IOC, ASN, Network, or Tags..." />
+          </div>
+
+          <!-- Custom Type Glass Dropdown -->
+          <div class="custom-dropdown" id="typeDropdown">
+            <button type="button" class="custom-dropdown-trigger" id="typeTrigger">
+              <span id="typeTriggerLabel">All IOC Types</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="custom-dropdown-menu" id="typeMenu">
+              <div class="custom-dropdown-item active" data-val="all">All IOC Types</div>
+              <div class="custom-dropdown-item" data-val="ip">IP Addresses</div>
+              <div class="custom-dropdown-item" data-val="domain">Domains</div>
+              <div class="custom-dropdown-item" data-val="hash">File Hashes</div>
+              <div class="custom-dropdown-item" data-val="url">URLs</div>
+            </div>
+          </div>
+
+          <!-- Custom Verdict Glass Dropdown -->
+          <div class="custom-dropdown" id="verdictDropdown">
+            <button type="button" class="custom-dropdown-trigger" id="verdictTrigger">
+              <span id="verdictTriggerLabel">All Verdicts</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="custom-dropdown-menu" id="verdictMenu">
+              <div class="custom-dropdown-item active" data-val="all">All Verdicts</div>
+              <div class="custom-dropdown-item" data-val="malicious">Malicious Only</div>
+              <div class="custom-dropdown-item" data-val="suspicious">Suspicious Only</div>
+              <div class="custom-dropdown-item" data-val="clean">Clean Only</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button id="exportCsv" class="btn btn-gradient">Export CSV</button>
+          <button id="exportJson" class="btn btn-secondary">Export JSON</button>
+          <button id="exportMd" class="btn btn-secondary">Markdown Report</button>
+          <button id="clearAll" class="btn btn-danger">Clear History</button>
+        </div>
+      </div>
+
+      <!-- HISTORY GRID -->
+      <div id="historyGrid" class="history-grid"></div>
+
+    </div>
+  </div>
+
+  <script src="history.js"></script>
+</body>
+</html>

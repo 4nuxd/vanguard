@@ -1,0 +1,52 @@
+name: Release VirusTotal Smart Inspector
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Package & Publish GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate Syntax & Manifest
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('manifest.json'))"
+          node -c src/background/*.js src/content/*.js src/popup/*.js src/options/*.js
+
+      - name: Extract Extension Version
+        id: get_version
+        run: |
+          VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('manifest.json')).version)")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Version extracted: $VERSION"
+
+      - name: Build Extension Release Zip Archive
+        run: |
+          bash scripts/build-release.sh
+
+      - name: Create GitHub Release & Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "VirusTotal Smart Inspector v${{ env.VERSION }}"
+          tag_name: ${{ github.ref_name }}
+          files: dist/*.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

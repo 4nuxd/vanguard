@@ -1,0 +1,121 @@
+/* tooltip.css - Black & White Glassmorphic Inline Webpage Tooltip & Highlights */
+
+.vt-ioc {
+  border-bottom: 1px dashed #ffffff;
+  padding: 1px 3px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .18s ease;
+  background: rgba(255, 255, 255, 0.08);
+}
+.vt-ioc:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+}
+
+/* Tooltip container */
+.vt-tooltip {
+  position: absolute;
+  background: rgba(14, 14, 18, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: #ffffff;
+  z-index: 99999999;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  width: 290px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.85);
+  animation: vtFadeIn .18s ease-out;
+}
+
+.vt-tooltip .vt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+.vt-tooltip .vt-title {
+  font-weight: 700;
+  font-size: 13px;
+  word-break: break-all;
+  color: #ffffff;
+}
+
+.vt-tooltip .vt-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.65);
+}
+.vt-tooltip .vt-row strong {
+  color: #ffffff;
+}
+
+.vt-badge {
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.vt-good { background: rgba(0, 230, 118, 0.25); color: #69f0ae; border: 1px solid rgba(0, 230, 118, 0.4); }
+.vt-warn { background: rgba(255, 171, 0, 0.25); color: #ffc107; border: 1px solid rgba(255, 171, 0, 0.4); }
+.vt-bad { background: rgba(255, 77, 77, 0.25); color: #ff6b6b; border: 1px solid rgba(255, 77, 77, 0.4); }
+
+.vt-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.vt-tag {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #ffffff;
+}
+
+.vt-tooltip .vt-btn {
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 11px;
+  transition: all .15s ease;
+}
+.vt-tooltip .vt-open {
+  background: #ffffff;
+  color: #000000;
+  width: 49%;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+.vt-tooltip .vt-rescan {
+  background: rgba(255, 77, 77, 0.25);
+  color: #ff80ab;
+  border: 1px solid rgba(255, 77, 77, 0.35);
+  width: 49%;
+}
+.vt-tooltip .vt-rescan:hover {
+  background: rgba(255, 77, 77, 0.4);
+}
+
+.vt-rescan-note {
+  font-size: 11px;
+  color: #ffffff;
+  margin-top: 6px;
+  text-align: center;
+}
+
+@keyframes vtFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
