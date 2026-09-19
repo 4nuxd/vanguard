@@ -59,6 +59,7 @@
     if (!node || !node.tagName) return false;
     const tag = node.tagName.toUpperCase();
     if (['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'SELECT', 'BUTTON', 'NOSCRIPT', 'SVG', 'CANVAS'].includes(tag)) return false;
+    if (node.closest && (node.closest('.vt-ioc') || node.closest('.vt-tooltip') || node.closest('.popup-root') || node.closest('.dashboard-root'))) return false;
     if (node.classList && (node.classList.contains('vt-ioc') || node.classList.contains('vt-tooltip'))) return false;
     return true;
   }
@@ -66,6 +67,8 @@
   // Text Node Replacement Engine
   function wrapMatchesInNode(textNode) {
     if (!autoHighlight) return false;
+    if (textNode.parentNode && textNode.parentNode.closest && textNode.parentNode.closest('.vt-ioc, .vt-tooltip, .popup-root, .dashboard-root')) return false;
+
     const text = textNode.nodeValue;
     if (!text || text.trim().length < 3) return false;
 
@@ -230,22 +233,26 @@
       </div>
     `;
 
-    // Enriched Network, Whois & Reputation Details
+    // Enriched Network, Whois & AbuseIPDB Details
     let networkDetailsHtml = '';
     if (data.asn) networkDetailsHtml += `<div class="vt-row"><span>ASN / Owner:</span><strong>${escapeAttr(data.asn)}</strong></div>`;
-    if (data.network) networkDetailsHtml += `<div class="vt-row"><span>CIDR Subnet:</span><strong>${escapeAttr(data.network)}</strong></div>`;
+    if (data.location) networkDetailsHtml += `<div class="vt-row"><span>Location:</span><strong>${escapeAttr(data.location)}</strong></div>`;
     if (data.registrar) networkDetailsHtml += `<div class="vt-row"><span>Registrar:</span><strong>${escapeAttr(data.registrar)}</strong></div>`;
-    if (data.country) networkDetailsHtml += `<div class="vt-row"><span>Country:</span><strong>${escapeAttr(data.country)}</strong></div>`;
+    if (data.country && !data.location) networkDetailsHtml += `<div class="vt-row"><span>Country:</span><strong>${escapeAttr(data.country)}</strong></div>`;
     if (data.reputation !== null && data.reputation !== undefined) {
       const repColor = data.reputation < 0 ? '#ff6b6b' : (data.reputation > 0 ? '#69f0ae' : '#ffffff');
       networkDetailsHtml += `<div class="vt-row"><span>Community Rep:</span><strong style="color:${repColor}">${data.reputation > 0 ? '+' : ''}${data.reputation}</strong></div>`;
     }
     if (data.whois) {
-      networkDetailsHtml += `<div class="vt-whois-box"><div class="vt-whois-lbl">Whois Summary</div>${escapeAttr(data.whois)}</div>`;
+      networkDetailsHtml += `<div class="vt-whois-box"><div class="vt-whois-lbl">WHOIS Summary</div><pre class="vt-whois-pre">${escapeAttr(data.whois)}</pre></div>`;
     }
 
     const tagsHtml = (data.tags && data.tags.length)
       ? `<div class="vt-tags">${data.tags.map(t => `<span class="vt-tag">${escapeAttr(t)}</span>`).join('')}</div>`
+      : '';
+
+    const abuseBtnHtml = data.abuseUrl
+      ? `<button class="vt-btn vt-abuse" data-url="${escapeAttr(data.abuseUrl)}">AbuseIPDB</button>`
       : '';
 
     tooltipEl.innerHTML = `
@@ -259,8 +266,9 @@
       <div class="vt-row"><span>Last Scan:</span><strong>${escapeAttr(date)}</strong></div>
       ${tagsHtml}
       <div style="margin-top:10px;display:flex;gap:6px;">
-        <button class="vt-btn vt-open">Open in VT</button>
-        <button class="vt-btn vt-rescan">Rescan</button>
+        <button class="vt-btn vt-open" style="flex:1">Open VT</button>
+        ${abuseBtnHtml}
+        <button class="vt-btn vt-rescan" style="flex:1">Rescan</button>
       </div>
     `;
 
@@ -286,6 +294,13 @@
     tooltipEl.querySelector('.vt-open').addEventListener('click', () => {
       window.open(`https://www.virustotal.com/gui/search/${encodeURIComponent(ioc)}`, '_blank');
     });
+
+    const abuseBtn = tooltipEl.querySelector('.vt-abuse');
+    if (abuseBtn) {
+      abuseBtn.addEventListener('click', () => {
+        window.open(abuseBtn.dataset.url, '_blank');
+      });
+    }
 
     tooltipEl.querySelector('.vt-rescan').addEventListener('click', () => {
       chrome.runtime.sendMessage({ type: 'vt_rescan', ioc }, () => {

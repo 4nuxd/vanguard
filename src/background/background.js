@@ -109,6 +109,33 @@ async function saveCache(ioc, data) {
   });
 }
 
+// Helper: Fetch ipinfo.io data for IP enrichment
+async function fetchIpInfo(ip) {
+  try {
+    const res = await fetch(`https://ipinfo.io/${encodeURIComponent(ip)}/json`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+// Helper: Format Whois into clean key-value lines
+function formatWhois(rawWhois) {
+  if (!rawWhois) return null;
+  const lines = rawWhois.split('\n')
+    .map(l => l.trim())
+    .filter(l => l && !l.startsWith('%') && !l.startsWith('#') && !l.startsWith(';') && l.includes(':'));
+
+  const cleanPairs = lines.slice(0, 5).map(l => {
+    const idx = l.indexOf(':');
+    const key = l.substring(0, idx).trim();
+    const val = l.substring(idx + 1).trim();
+    return `${key}: ${val}`;
+  });
+  return cleanPairs.length ? cleanPairs.join('\n') : null;
+}
+
 // Query VT API for any IOC Type
 async function vtLookup(rawIoc, apiKey) {
   const { type, clean } = detectIOCType(rawIoc);
@@ -158,15 +185,34 @@ async function vtLookup(rawIoc, apiKey) {
     const vendors = Object.keys(results).length;
     const lastScanUnix = attr.last_analysis_date || null;
 
-    // Enrichment extraction
-    const asn = attr.asn ? `AS${attr.asn} (${attr.as_owner || ''})` : null;
-    const network = attr.network || null;
+    // Fetch IPInfo.io for IP IOCs
+    let ipInfo = null;
+    if (type === "ip") {
+      ipInfo = await fetchIpInfo(clean);
+    }
+
+    // Format Whois for Domains & IPs
+    let formattedWhois = null;
+    if (attr.whois) {
+      formattedWhois = formatWhois(attr.whois);
+    } else if (ipInfo) {
+      const parts = [];
+      if (ipInfo.org) parts.push(`Org: ${ipInfo.org}`);
+      if (ipInfo.city || ipInfo.region || ipInfo.country) {
+        parts.push(`Location: ${[ipInfo.city, ipInfo.region, ipInfo.country].filter(Boolean).join(', ')}`);
+      }
+      if (ipInfo.timezone) parts.push(`Timezone: ${ipInfo.timezone}`);
+      formattedWhois = parts.join('\n');
+    }
+
+    const asn = attr.asn ? `AS${attr.asn} (${attr.as_owner || ''})` : (ipInfo?.org || null);
+    const country = attr.country || ipInfo?.country || null;
+    const location = ipInfo ? [ipInfo.city, ipInfo.region, ipInfo.country].filter(Boolean).join(', ') : null;
     const registrar = attr.registrar || null;
-    const country = attr.country || null;
-    const whois = attr.whois ? attr.whois.trim().split('\n').slice(0, 3).join(' • ') : null;
     const tags = Array.isArray(attr.tags) ? attr.tags.slice(0, 5) : [];
     const categories = attr.categories ? Object.values(attr.categories).slice(0, 3) : [];
     const reputation = attr.reputation !== undefined ? attr.reputation : null;
+    const abuseUrl = (type === "ip") ? `https://www.abuseipdb.com/check/${encodeURIComponent(clean)}` : null;
 
     return {
       ioc: clean,
@@ -178,10 +224,11 @@ async function vtLookup(rawIoc, apiKey) {
       vendors,
       date: lastScanUnix ? new Date(lastScanUnix * 1000).toLocaleString() : "Unknown",
       asn,
-      network,
+      location,
       registrar,
       country,
-      whois,
+      whois: formattedWhois,
+      abuseUrl,
       tags: [...new Set([...tags, ...categories])].slice(0, 5),
       reputation,
       raw: json

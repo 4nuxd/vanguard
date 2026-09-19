@@ -87,22 +87,32 @@
 
 .vt-whois-box {
   margin: 6px 0;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.4;
   word-break: break-all;
 }
 .vt-whois-lbl {
-  font-weight: 700;
+  font-weight: 800;
   color: #ffffff;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   text-transform: uppercase;
   font-size: 9px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
+}
+.vt-whois-pre {
+  margin: 0;
+  padding: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.4;
 }
 
 .vt-tooltip .vt-row {
@@ -153,14 +163,21 @@
 .vt-tooltip .vt-open {
   background: #ffffff;
   color: #000000;
-  width: 49%;
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+.vt-tooltip .vt-abuse {
+  background: rgba(255, 171, 0, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 171, 0, 0.35);
+  flex: 1;
+}
+.vt-tooltip .vt-abuse:hover {
+  background: rgba(255, 171, 0, 0.35);
 }
 .vt-tooltip .vt-rescan {
   background: rgba(255, 77, 77, 0.25);
   color: #ff80ab;
   border: 1px solid rgba(255, 77, 77, 0.35);
-  width: 49%;
 }
 .vt-tooltip .vt-rescan:hover {
   background: rgba(255, 77, 77, 0.4);
