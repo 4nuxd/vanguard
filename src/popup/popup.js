@@ -205,7 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
   searchBox.addEventListener('input', () => {
     const q = undefang(searchBox.value.trim());
     if (timer) clearTimeout(timer);
-    if (!q) { searchResults.style.display = 'none'; return; }
+    if (!q) {
+      searchResults.style.display = 'none';
+      loadRecent();
+      return;
+    }
     showLoading();
     timer = setTimeout(() => searchLookup(q), 420);
   });
@@ -217,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     renderThreatResults([{ ioc: q, ts: Date.now(), data: vt }]);
-    loadRecent();
   }
 
   function renderThreatResults(list) {
