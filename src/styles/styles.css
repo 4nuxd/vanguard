@@ -491,3 +491,29 @@ input:checked + .slider:before { transform: translateX(16px); background: #00000
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Footer Branding */
+.popup-footer {
+  margin-top: auto;
+  padding-top: 14px;
+  padding-bottom: 2px;
+  font-size: 11px;
+  color: var(--text-sub);
+  text-align: center;
+  user-select: none;
+}
+.footer-link {
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all .15s ease;
+}
+.footer-link:hover {
+  text-decoration: underline;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+.heart {
+  color: #ff4d4d;
+  display: inline-block;
+  margin-left: 2px;
+}
