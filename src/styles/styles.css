@@ -359,10 +359,65 @@ html, body {
 }
 .batch-textarea:focus { outline: none; border-color: #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
 
-.batch-results { margin-top: 10px; max-height: 180px; overflow-y: auto; }
+.batch-results { margin-top: 12px; max-height: 220px; overflow-y: auto; }
+
+/* Luxury Status Banner */
+.batch-status-banner {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.batch-status-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.batch-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff;
+  animation: radarPulse 1.2s infinite ease-in-out;
+}
+@keyframes radarPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.batch-status-count {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Glass Table */
 .batch-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.batch-table th, .batch-table td { padding: 7px 8px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.batch-table th, .batch-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
 .batch-table th { color: var(--text-sub); font-size: 10px; text-transform: uppercase; font-weight: 700; }
+.batch-table td.ioc-cell { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #ffffff; word-break: break-all; }
+
+.scanning-pill {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 
 /* Settings Modal - Positioned comfortably inside frame */
 .settings-panel {

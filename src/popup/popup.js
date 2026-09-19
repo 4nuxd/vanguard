@@ -313,37 +313,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
     batchResults.style.display = 'block';
     batchResults.innerHTML = `
-      <div style="font-weight:700;margin-bottom:8px;font-size:12px;color:#00e5ff">
-        Found ${uniqueClean.length} IOC(s). Scanning VirusTotal...
+      <div id="batchBanner" class="batch-status-banner">
+        <div class="batch-status-info">
+          <div id="batchPulse" class="batch-pulse-dot"></div>
+          <span id="batchStatusText">Extracted ${uniqueClean.length} IOC(s)</span>
+        </div>
+        <span id="batchCountBadge" class="batch-status-count">0 / ${uniqueClean.length} Done</span>
       </div>
+
       <table class="batch-table">
         <thead>
           <tr>
-            <th>IOC</th>
+            <th>Indicator (IOC)</th>
             <th>Verdict</th>
-            <th>Action</th>
+            <th style="text-align:right">Action</th>
           </tr>
         </thead>
         <tbody id="batchTableBody"></tbody>
       </table>
     `;
 
+    let completed = 0;
+    const total = uniqueClean.length;
     const tbody = document.getElementById('batchTableBody');
+    const countBadge = document.getElementById('batchCountBadge');
+    const statusText = document.getElementById('batchStatusText');
+    const pulseDot = document.getElementById('batchPulse');
+
     for (const ioc of uniqueClean) {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${esc(ioc)}</td>
-        <td class="status-cell">Scanning...</td>
-        <td><a href="https://www.virustotal.com/gui/search/${encodeURIComponent(ioc)}" target="_blank" class="small-link">VT</a></td>
+        <td class="ioc-cell">${esc(ioc)}</td>
+        <td class="status-cell"><span class="scanning-pill">⚡ Scanning...</span></td>
+        <td style="text-align:right"><button class="btn btn-secondary open-vt-btn" data-ioc="${esc(ioc)}" style="padding:3px 8px;font-size:10px;">VT</button></td>
       `;
       tbody.appendChild(tr);
 
+      tr.querySelector('.open-vt-btn').addEventListener('click', e => {
+        window.open("https://www.virustotal.com/gui/search/" + encodeURIComponent(e.target.dataset.ioc), '_blank');
+      });
+
       vtQuery(ioc).then(res => {
+        completed++;
+        countBadge.textContent = `${completed} / ${total} Done`;
+
         const cell = tr.querySelector('.status-cell');
         if (!res || res.error) {
-          cell.innerHTML = `<span style="color:#ff80ab">${res?.error || 'Error'}</span>`;
+          cell.innerHTML = `<span class="badge bad">${esc(res?.error || 'Error')}</span>`;
         } else {
           cell.innerHTML = badge(res);
+        }
+
+        if (completed === total) {
+          statusText.textContent = `✓ Scan Complete (${total} IOCs)`;
+          pulseDot.style.background = '#00e676';
+          pulseDot.style.boxShadow = '0 0 10px #00e676';
+          pulseDot.style.animation = 'none';
         }
       });
     }
