@@ -126,13 +126,22 @@
     </div>
   </div>
 
-  <div class="actions" style="margin-top:10px;">
-    <button id="saveBtn" class="btn btn-gradient">Save Key</button>
-    <button id="testBtn" class="btn btn-ghost">Test Key</button>
+  <div class="field-wrap" style="margin-top:10px;">
+    <label class="label">AbuseIPDB API Key (Optional)</label>
+    <div class="input-with-icon">
+      <input id="abuseApiInput" class="input" type="password" placeholder="Paste AbuseIPDB API key...">
+      <button id="toggleAbusePassBtn" class="eye-btn" type="button" title="Show/Hide Key">👁</button>
+    </div>
+  </div>
+
+  <div class="actions" style="margin-top:12px;">
+    <button id="saveBtn" class="btn btn-gradient">Save Keys</button>
+    <button id="testBtn" class="btn btn-ghost">Test Keys</button>
     <button id="clearBtn" class="btn btn-danger">Clear</button>
   </div>
 
-  <div id="keyStatus" class="key-status">No key configured</div>
+  <div id="keyStatus" class="key-status">VT Key: Not configured</div>
+  <div id="abuseKeyStatus" class="key-status" style="margin-top:3px;color:rgba(255,255,255,0.45)">AbuseIPDB Key: Optional</div>
 
   <div class="divider"></div>
 

@@ -27,6 +27,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const recentList = document.getElementById('recentList');
   const viewAllBtn = document.getElementById('viewAllBtn');
 
+  const apiInput = document.getElementById('apiInput');
+  const togglePassBtn = document.getElementById('togglePassBtn');
+  const abuseApiInput = document.getElementById('abuseApiInput');
+  const toggleAbusePassBtn = document.getElementById('toggleAbusePassBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const testBtn = document.getElementById('testBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const keyStatus = document.getElementById('keyStatus');
+  const abuseKeyStatus = document.getElementById('abuseKeyStatus');
+  const autoToggle = document.getElementById('autoHighlightToggle');
+  const skipPrivateToggle = document.getElementById('skipPrivateToggle');
+
   const batchInput = document.getElementById('batchInput');
   const batchScanBtn = document.getElementById('batchScanBtn');
   const batchClearBtn = document.getElementById('batchClearBtn');
@@ -34,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const toastRoot = document.getElementById('toast-root');
 
-  // Password visibility toggle
+  // Password visibility toggles
   if (togglePassBtn && apiInput) {
     togglePassBtn.addEventListener('click', () => {
       if (apiInput.type === 'password') {
@@ -43,6 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         apiInput.type = 'password';
         togglePassBtn.textContent = '👁';
+      }
+    });
+  }
+
+  if (toggleAbusePassBtn && abuseApiInput) {
+    toggleAbusePassBtn.addEventListener('click', () => {
+      if (abuseApiInput.type === 'password') {
+        abuseApiInput.type = 'text';
+        toggleAbusePassBtn.textContent = '🔒';
+      } else {
+        abuseApiInput.type = 'password';
+        toggleAbusePassBtn.textContent = '👁';
       }
     });
   }
@@ -151,30 +175,52 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Settings
+  function updateKeyStatuses() {
+    chrome.storage.local.get(['vt_api_key', 'abuse_api_key'], res => {
+      keyStatus.innerHTML = res.vt_api_key ? '<span style="color:#00e676;font-weight:600">✓ VT Key Configured</span>' : 'VT Key: Not configured';
+      if (abuseKeyStatus) {
+        abuseKeyStatus.innerHTML = res.abuse_api_key ? '<span style="color:#00e676;font-weight:600">✓ AbuseIPDB Key Configured</span>' : 'AbuseIPDB Key: Optional';
+      }
+    });
+  }
+
   saveBtn.addEventListener('click', () => {
     const key = apiInput.value.trim();
-    if (!key) { toast('Enter VirusTotal key', 'error'); return; }
-    chrome.storage.local.set({ vt_api_key: key }, () => {
-      apiInput.value = '';
-      keyStatus.innerHTML = '<span style="color:#00e676;font-weight:600">✓ API Key Configured</span>';
-      toast('API key saved successfully', 'success');
+    const abuseKey = abuseApiInput ? abuseApiInput.value.trim() : '';
+
+    if (!key && !abuseKey) { toast('Enter VT or AbuseIPDB API key', 'error'); return; }
+
+    const updateObj = {};
+    if (key) updateObj.vt_api_key = key;
+    if (abuseKey) updateObj.abuse_api_key = abuseKey;
+
+    chrome.storage.local.set(updateObj, () => {
+      if (key) apiInput.value = '';
+      if (abuseKey) abuseApiInput.value = '';
+      toast('API keys saved successfully', 'success');
+      updateKeyStatuses();
     });
   });
 
   testBtn.addEventListener('click', () => {
-    chrome.storage.local.get(['vt_api_key'], res => {
-      if (!res.vt_api_key) { toast('No API key set', 'error'); return; }
-      chrome.runtime.sendMessage({ type: 'vt_query', ioc: '8.8.8.8' }, r => {
-        if (r?.error) toast(r.error, 'error');
-        else toast('API Key verified active!', 'success');
-      });
+    chrome.storage.local.get(['vt_api_key', 'abuse_api_key'], res => {
+      if (!res.vt_api_key && !res.abuse_api_key) { toast('No API keys set', 'error'); return; }
+      if (res.vt_api_key) {
+        chrome.runtime.sendMessage({ type: 'vt_query', ioc: '8.8.8.8' }, r => {
+          if (r?.error) toast('VT: ' + r.error, 'error');
+          else toast('VT Key verified active!', 'success');
+        });
+      }
+      if (res.abuse_api_key) {
+        toast('AbuseIPDB Key configured & ready', 'info');
+      }
     });
   });
 
   clearBtn.addEventListener('click', () => {
-    chrome.storage.local.remove(['vt_api_key','vt_cache'], () => {
-      toast('Cleared API key & local cache', 'info');
-      keyStatus.textContent = 'No key configured';
+    chrome.storage.local.remove(['vt_api_key', 'abuse_api_key', 'vt_cache'], () => {
+      toast('Cleared API keys & local cache', 'info');
+      updateKeyStatuses();
       loadRecent();
     });
   });
@@ -381,8 +427,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Init settings status
-  chrome.storage.local.get(['vt_api_key', 'auto_highlight', 'skip_private_ip'], res => {
-    keyStatus.innerHTML = res.vt_api_key ? '<span style="color:#00e676;font-weight:600">✓ API Key Configured</span>' : 'No key configured';
+  updateKeyStatuses();
+  chrome.storage.local.get(['auto_highlight', 'skip_private_ip'], res => {
     autoToggle.checked = res.auto_highlight !== false;
     skipPrivateToggle.checked = res.skip_private_ip !== false;
   });
