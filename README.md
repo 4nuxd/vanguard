@@ -13,7 +13,7 @@ An enterprise-grade, luxury glassmorphism Manifest V3 browser extension powered 
 [![VirusTotal API v3](https://img.shields.io/badge/VIRUSTOTAL-API%20V3-2563EB?style=for-the-badge&logo=virustotal&logoColor=white)](https://virustotal.com)
 [![IPInfo.io](https://img.shields.io/badge/IPINFO-GEO%20%26%20ISP-00E5FF?style=for-the-badge)](https://ipinfo.io)
 [![AbuseIPDB](https://img.shields.io/badge/ABUSEIPDB-REPUTATION-FFC107?style=for-the-badge)](https://abuseipdb.com)
-[![Release v4.0.0](https://img.shields.io/badge/RELEASE-V4.0.0-8B5CF6?style=for-the-badge&logo=github&logoColor=white)](#github-release-system)
+[![Release v4.1.0](https://img.shields.io/badge/RELEASE-V4.1.0-8B5CF6?style=for-the-badge&logo=github&logoColor=white)](#github-release-system)
 [![License GPL-3.0](https://img.shields.io/badge/LICENSE-GPL--3.0-000000?style=for-the-badge)](LICENSE)
 
 ---
