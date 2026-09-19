@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VirusTotal Smart Inspector",
-  "version": "2.1",
+  "version": "2.2",
   "description": "Features real-time VirusTotal reputation, batch IOC scanning, defanging parsing, and SOC reporting.",
   "icons": {
     "16": "icons/icon16.png",
