@@ -1,5 +1,5 @@
 // content.js (v2.0 Viewport-Optimized Highlighting Engine)
-// High-performance IntersectionObserver scanning for URLs, Defanged URLs, IPs, Defanged IPs, Domains, Defanged Domains, and Hashes
+// High-performance IntersectionObserver scanning for Universal URLs, Defanged URLs, IPs, Defanged IPs, Universal Domains, Defanged Domains, and Hashes
 
 (() => {
   if (window.__vt_inspector_injected) return;
@@ -19,13 +19,15 @@
   refreshSettings();
 
   // Regular Expression Definitions
-  const URL_REGEX = /\b(?:https?|hxxps?|h\*\*ps?):\/\/[^\s<>"'\)]+/gi;
+  const URL_REGEX = /\b(?:(?:https?|hxxps?|h\*\*ps?|ftp):\/\/|www\.)[^\s<>"'\)]+/gi;
   const IPV4_REGEX = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\[\.\]|\(\.\)|\.)){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/gi;
   const DOMAIN_DEFANG_REGEX = /\b(?:[a-zA-Z0-9-]{1,63}(?:\[\.\]|\(\.\))){1,}[a-zA-Z]{2,24}\b/gi;
-  const COMMON_TLD_REGEX = /\b(?:[a-zA-Z0-9-]{2,63}\.)+(?:com|org|net|io|xyz|ru|cn|info|biz|gov|edu|uk|de|jp|fr|au|co|me|ai|app|dev|cloud|online|site|tech|store|top)\b/gi;
+  const UNIVERSAL_DOMAIN_REGEX = /\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,24}\b/gi;
   const SHA256_REGEX = /\b[a-fA-F0-9]{64}\b/g;
   const SHA1_REGEX = /\b[a-fA-F0-9]{40}\b/g;
   const MD5_REGEX = /\b[a-fA-F0-9]{32}\b/g;
+
+  const FILE_EXT_EXCLUDE = /\.(?:js|css|html|htm|png|jpg|jpeg|gif|svg|json|md|py|cpp|c|h|java|ts|sh|exe|zip|tar|gz|woff|woff2|ttf|eot)$/i;
 
   // Private / Loopback IPv4 check
   function isPrivateIP(ip) {
@@ -56,7 +58,7 @@
   function isTargetContainer(node) {
     if (!node || !node.tagName) return false;
     const tag = node.tagName.toUpperCase();
-    if (['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'SELECT', 'BUTTON', 'CODE', 'PRE', 'NOSCRIPT', 'SVG', 'CANVAS'].includes(tag)) return false;
+    if (['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'SELECT', 'BUTTON', 'NOSCRIPT', 'SVG', 'CANVAS'].includes(tag)) return false;
     if (node.classList && (node.classList.contains('vt-ioc') || node.classList.contains('vt-tooltip'))) return false;
     return true;
   }
@@ -65,7 +67,7 @@
   function wrapMatchesInNode(textNode) {
     if (!autoHighlight) return false;
     const text = textNode.nodeValue;
-    if (!text || text.trim().length < 4) return false;
+    if (!text || text.trim().length < 3) return false;
 
     // Fast check to skip text nodes without potential IOC patterns
     if (!/[a-zA-Z0-9]/.test(text)) return false;
@@ -78,21 +80,24 @@
       if (type === "ip" && skipPrivateIp && isPrivateIP(clean)) {
         return match;
       }
+      if (type === "domain" && FILE_EXT_EXCLUDE.test(clean) && !clean.includes('..')) {
+        return match;
+      }
       hasMatch = true;
       return `<span class="vt-ioc" data-ioc="${escapeAttr(clean)}" data-type="${type}">${match}</span>`;
     };
 
     let replaced = text;
 
-    // 1. Process URLs & Defanged URLs first
+    // 1. Process URLs & Defanged URLs first (e.g. https://..., www.4nuxd.one)
     replaced = replaced.replace(URL_REGEX, m => replaceFn(m, "url"));
 
-    // 2. Process IPv4 & Defanged IPv4
+    // 2. Process IPv4 & Defanged IPv4 (e.g. 160.238.72.12, 1.1.1[.]1)
     replaced = replaced.replace(IPV4_REGEX, m => replaceFn(m, "ip"));
 
-    // 3. Process Defanged Domains & Standard TLD Domains
+    // 3. Process Defanged Domains & Universal Domains (e.g. 4nuxd.one, example.com)
     replaced = replaced.replace(DOMAIN_DEFANG_REGEX, m => replaceFn(m, "domain"));
-    replaced = replaced.replace(COMMON_TLD_REGEX, m => replaceFn(m, "domain"));
+    replaced = replaced.replace(UNIVERSAL_DOMAIN_REGEX, m => replaceFn(m, "domain"));
 
     // 4. Process Hashes (SHA256, SHA1, MD5)
     replaced = replaced.replace(SHA256_REGEX, m => replaceFn(m, "hash"));
@@ -129,7 +134,7 @@
       }
     });
   }, {
-    rootMargin: '200px 0px 200px 0px',
+    rootMargin: '250px 0px 250px 0px',
     threshold: 0.01
   });
 
@@ -157,7 +162,7 @@
 
   function scanCurrentViewport() {
     if (!autoHighlight) return;
-    const candidates = document.querySelectorAll('p, div, span, li, td, th, article, section, h1, h2, h3, h4, h5, h6, a, blockquote');
+    const candidates = document.querySelectorAll('p, div, span, li, td, th, article, section, h1, h2, h3, h4, h5, h6, a, code, pre, blockquote');
     candidates.forEach(el => observeCandidate(el));
   }
 
@@ -344,7 +349,7 @@
         m.addedNodes.forEach(node => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             if (isTargetContainer(node)) observeCandidate(node);
-            const children = node.querySelectorAll ? node.querySelectorAll('p, div, span, li, td, th, article, section, a') : [];
+            const children = node.querySelectorAll ? node.querySelectorAll('p, div, span, li, td, th, article, section, a, code, pre') : [];
             children.forEach(child => observeCandidate(child));
           }
         });
