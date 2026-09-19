@@ -80,6 +80,31 @@ function urlToVtId(url) {
   }
 }
 
+// Helper: Storage helper for AbuseIPDB API Key
+async function getAbuseApiKey() {
+  return new Promise(resolve => {
+    chrome.storage.local.get(["abuse_api_key"], res => resolve(res.abuse_api_key || null));
+  });
+}
+
+// Helper: Fetch AbuseIPDB API data for IP enrichment
+async function fetchAbuseIPDB(ip, apiKey) {
+  if (!apiKey || !ip) return null;
+  try {
+    const res = await fetch(`https://api.abuseipdb.com/api/v2/check?ipAddress=${encodeURIComponent(ip)}&maxAgeInDays=90`, {
+      headers: {
+        'Key': apiKey,
+        'Accept': 'application/json'
+      }
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data || null;
+  } catch (e) {
+    return null;
+  }
+}
+
 // Storage Helpers
 async function getApiKey() {
   return new Promise(resolve => {
@@ -100,9 +125,14 @@ async function getCache(ioc) {
 }
 
 async function saveCache(ioc, data) {
+  if (!ioc || ioc.includes('<') || ioc.includes('html')) return;
   return new Promise(resolve => {
     chrome.storage.local.get(["vt_cache"], res => {
       const cache = res.vt_cache || {};
+      // Purge any corrupted keys while saving
+      Object.keys(cache).forEach(k => {
+        if (!k || k.includes('<') || k.includes('html')) delete cache[k];
+      });
       cache[ioc] = { ts: Date.now(), data };
       chrome.storage.local.set({ vt_cache: cache }, () => resolve(true));
     });
@@ -191,6 +221,15 @@ async function vtLookup(rawIoc, apiKey) {
       ipInfo = await fetchIpInfo(clean);
     }
 
+    // Fetch AbuseIPDB API data if key is configured
+    let abuseData = null;
+    if (type === "ip") {
+      const abuseKey = await getAbuseApiKey();
+      if (abuseKey) {
+        abuseData = await fetchAbuseIPDB(clean, abuseKey);
+      }
+    }
+
     // Format Whois for Domains & IPs
     let formattedWhois = null;
     if (attr.whois) {
@@ -229,6 +268,9 @@ async function vtLookup(rawIoc, apiKey) {
       country,
       whois: formattedWhois,
       abuseUrl,
+      abuseScore: abuseData ? abuseData.abuseConfidenceScore : null,
+      abuseReports: abuseData ? abuseData.totalReports : null,
+      abuseData: abuseData || null,
       tags: [...new Set([...tags, ...categories])].slice(0, 5),
       reputation,
       raw: json

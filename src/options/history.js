@@ -72,8 +72,10 @@
   function loadAll() {
     chrome.storage.local.get(['vt_cache'], res => {
       const cache = res.vt_cache || {};
-      let entries = Object.keys(cache).map(k => ({ ioc: k, ...cache[k] }));
-      entries.sort((a,b) => b.ts - a.ts);
+      let entries = Object.keys(cache)
+        .filter(k => k && !k.includes('<') && !k.includes('html'))
+        .map(k => ({ ioc: k, ...cache[k] }));
+      entries.sort((a,b) => (b.ts || 0) - (a.ts || 0));
 
       updateMetrics(entries);
       filterAndRender(entries);
