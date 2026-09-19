@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Vanguard Threat Engine",
-  "version": "4.1",
+  "version": "4.2",
   "description": "Multipurpose Threat Intelligence Engine powered by VirusTotal, IPInfo.io, and AbuseIPDB. Features real-time IOC inspection, batch log scanning, WHOIS parsing, and SOC reporting.",
   "icons": {
     "16": "icons/icon16.png",

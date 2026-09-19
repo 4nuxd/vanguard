@@ -1,4 +1,4 @@
-// popup.js (Enhanced v4.1 Vanguard Threat Engine)
+// popup.js (Enhanced v4.2 Vanguard Threat Engine)
 // Tab navigation, quick search with rich threat breakdown, batch scanner, setting drawer, password eye toggle, cache sanitization
 
 document.addEventListener('DOMContentLoaded', () => {
