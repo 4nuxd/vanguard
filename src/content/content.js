@@ -161,20 +161,48 @@
     candidates.forEach(el => observeCandidate(el));
   }
 
-  // Tooltip Management
+  // Tooltip State & Hover Persistence Bridge
   let tooltipEl = null;
+  let activeTargetEl = null;
+  let isMouseOverIOC = false;
+  let isMouseOverTooltip = false;
+  let hideTimer = null;
+
+  function scheduleHide() {
+    hideTimer && clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (!isMouseOverIOC && !isMouseOverTooltip) {
+        removeTooltip();
+      }
+    }, 250);
+  }
 
   function removeTooltip() {
     if (tooltipEl && tooltipEl.parentNode) {
       tooltipEl.remove();
       tooltipEl = null;
     }
+    activeTargetEl = null;
   }
 
   function createTooltip(ioc, data, targetEl) {
+    if (activeTargetEl === targetEl && tooltipEl) return;
     removeTooltip();
+    activeTargetEl = targetEl;
+
     tooltipEl = document.createElement('div');
     tooltipEl.className = 'vt-tooltip';
+
+    // Hover persistence listeners on tooltip itself
+    tooltipEl.addEventListener('mouseenter', () => {
+      isMouseOverTooltip = true;
+      hideTimer && clearTimeout(hideTimer);
+    });
+
+    tooltipEl.addEventListener('mouseleave', () => {
+      isMouseOverTooltip = false;
+      scheduleHide();
+    });
 
     const malicious = data.malicious || 0;
     const suspicious = data.suspicious || 0;
@@ -187,12 +215,32 @@
     if (malicious >= 5) scoreBadge = `<span class="vt-badge vt-bad">Malicious (${malicious})</span>`;
     else if (malicious >= 1 || suspicious >= 1) scoreBadge = `<span class="vt-badge vt-warn">Suspicious (${malicious})</span>`;
 
+    // Detailed Verdict Grid Breakdown
+    const verdictGridHtml = `
+      <div class="vt-verdict-grid">
+        <div class="vt-vitem"><span class="vt-vlbl" style="color:#ff6b6b">🔴 Malicious</span><strong>${malicious}</strong></div>
+        <div class="vt-vitem"><span class="vt-vlbl" style="color:#ffc107">🟡 Suspicious</span><strong>${suspicious}</strong></div>
+        <div class="vt-vitem"><span class="vt-vlbl" style="color:#69f0ae">🟢 Clean</span><strong>${harmless}</strong></div>
+        <div class="vt-vitem"><span class="vt-vlbl" style="color:#a0a0b0">⚪ Undetected</span><strong>${undetected}</strong></div>
+      </div>
+    `;
+
+    // Enriched Network, Whois & Reputation Details
+    let networkDetailsHtml = '';
+    if (data.asn) networkDetailsHtml += `<div class="vt-row"><span>ASN / Owner:</span><strong>${escapeAttr(data.asn)}</strong></div>`;
+    if (data.network) networkDetailsHtml += `<div class="vt-row"><span>CIDR Subnet:</span><strong>${escapeAttr(data.network)}</strong></div>`;
+    if (data.registrar) networkDetailsHtml += `<div class="vt-row"><span>Registrar:</span><strong>${escapeAttr(data.registrar)}</strong></div>`;
+    if (data.country) networkDetailsHtml += `<div class="vt-row"><span>Country:</span><strong>${escapeAttr(data.country)}</strong></div>`;
+    if (data.reputation !== null && data.reputation !== undefined) {
+      const repColor = data.reputation < 0 ? '#ff6b6b' : (data.reputation > 0 ? '#69f0ae' : '#ffffff');
+      networkDetailsHtml += `<div class="vt-row"><span>Community Rep:</span><strong style="color:${repColor}">${data.reputation > 0 ? '+' : ''}${data.reputation}</strong></div>`;
+    }
+    if (data.whois) {
+      networkDetailsHtml += `<div class="vt-whois-box"><div class="vt-whois-lbl">Whois Summary</div>${escapeAttr(data.whois)}</div>`;
+    }
+
     const tagsHtml = (data.tags && data.tags.length)
       ? `<div class="vt-tags">${data.tags.map(t => `<span class="vt-tag">${escapeAttr(t)}</span>`).join('')}</div>`
-      : '';
-
-    const enrichedInfo = data.asn
-      ? `<div class="vt-row"><span>Network:</span><strong>${escapeAttr(data.asn)}</strong></div>`
       : '';
 
     tooltipEl.innerHTML = `
@@ -200,9 +248,9 @@
         <span class="vt-title">${escapeAttr(ioc)}</span>
         ${scoreBadge}
       </div>
-      ${enrichedInfo}
-      <div class="vt-row"><span>Stats (M/S/H/U):</span><strong>${malicious}/${suspicious}/${harmless}/${undetected}</strong></div>
-      <div class="vt-row"><span>Vendors:</span><strong>${vendors}</strong></div>
+      ${verdictGridHtml}
+      ${networkDetailsHtml ? `<div class="vt-divider"></div>${networkDetailsHtml}` : ''}
+      <div class="vt-row"><span>Total Vendors:</span><strong>${vendors} scanned</strong></div>
       <div class="vt-row"><span>Last Scan:</span><strong>${escapeAttr(date)}</strong></div>
       ${tagsHtml}
       <div style="margin-top:10px;display:flex;gap:6px;">
@@ -213,13 +261,13 @@
 
     document.body.appendChild(tooltipEl);
 
-    // Precise position calculation
+    // Precise positioning calculation
     const rect = targetEl.getBoundingClientRect();
     requestAnimationFrame(() => {
       if (!tooltipEl) return;
       const ttRect = tooltipEl.getBoundingClientRect();
-      let top = rect.top - ttRect.height - 10;
-      if (top < 6) top = rect.bottom + 8;
+      let top = rect.top - ttRect.height - 8;
+      if (top < 6) top = rect.bottom + 6;
       let left = rect.left;
       if (left + ttRect.width > window.innerWidth - 12) {
         left = window.innerWidth - ttRect.width - 12;
@@ -251,31 +299,37 @@
     });
   }
 
-  // Hover Events for Enriched Tooltip
+  // Hover Events for Enriched Tooltip with Mouse Persistence
   let hoverTimer = null;
   document.addEventListener('mouseover', e => {
     const target = e.target;
     if (!target || !target.classList || !target.classList.contains('vt-ioc')) return;
+
+    isMouseOverIOC = true;
+    hideTimer && clearTimeout(hideTimer);
 
     const ioc = target.dataset.ioc;
     if (!ioc) return;
 
     hoverTimer && clearTimeout(hoverTimer);
     hoverTimer = setTimeout(async () => {
+      if (!isMouseOverIOC) return;
       const data = await queryVT(ioc);
+      if (!isMouseOverIOC) return;
       if (!data || data.error) {
         createTooltip(ioc, { malicious: 0, suspicious: 0, harmless: 0, undetected: 0, vendors: 0, date: data?.error || 'N/A' }, target);
         return;
       }
       createTooltip(ioc, data, target);
-    }, 180);
+    }, 150);
   });
 
   document.addEventListener('mouseout', e => {
     const target = e.target;
     if (!target || !target.classList || !target.classList.contains('vt-ioc')) return;
+    isMouseOverIOC = false;
     hoverTimer && clearTimeout(hoverTimer);
-    setTimeout(removeTooltip, 160);
+    scheduleHide();
   });
 
   // Init Settings & Observer

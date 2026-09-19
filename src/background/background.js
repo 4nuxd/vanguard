@@ -160,7 +160,10 @@ async function vtLookup(rawIoc, apiKey) {
 
     // Enrichment extraction
     const asn = attr.asn ? `AS${attr.asn} (${attr.as_owner || ''})` : null;
+    const network = attr.network || null;
+    const registrar = attr.registrar || null;
     const country = attr.country || null;
+    const whois = attr.whois ? attr.whois.trim().split('\n').slice(0, 3).join(' • ') : null;
     const tags = Array.isArray(attr.tags) ? attr.tags.slice(0, 5) : [];
     const categories = attr.categories ? Object.values(attr.categories).slice(0, 3) : [];
     const reputation = attr.reputation !== undefined ? attr.reputation : null;
@@ -175,7 +178,10 @@ async function vtLookup(rawIoc, apiKey) {
       vendors,
       date: lastScanUnix ? new Date(lastScanUnix * 1000).toLocaleString() : "Unknown",
       asn,
+      network,
+      registrar,
       country,
+      whois,
       tags: [...new Set([...tags, ...categories])].slice(0, 5),
       reputation,
       raw: json
