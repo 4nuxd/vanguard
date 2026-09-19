@@ -10,9 +10,9 @@ echo "=========================================="
 echo " Building VirusTotal Smart Inspector Release "
 echo "=========================================="
 
-# Read version from manifest.json
+NAME=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$PROJECT_DIR/manifest.json')).name.toLowerCase().replace(/\s+/g, '-'))")
 VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$PROJECT_DIR/manifest.json')).version)")
-ZIP_NAME="virustotal-smart-inspector-v${VERSION}.zip"
+ZIP_NAME="${NAME}-v${VERSION}.zip"
 ZIP_PATH="$DIST_DIR/$ZIP_NAME"
 
 echo "Extension Version: v$VERSION"

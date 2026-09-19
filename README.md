@@ -1,19 +1,19 @@
 <div align="center">
 
-# 🛡️ VirusTotal Smart Inspector
+# 🛡️ Vanguard Threat Engine
 
-### Instant In-Page Indicator Analysis & Threat Intelligence Engine
+### Multipurpose Threat Intelligence Engine & SOC Incident Response Suite
 
-An enterprise-grade, glassmorphism Manifest V3 browser extension that highlights Indicators of Compromise (IPs, Domains, Hashes), parses defanged indicators, and delivers real-time VirusTotal reputation inline.
+An enterprise-grade, luxury glassmorphism Manifest V3 browser extension powered by VirusTotal, IPInfo.io, and AbuseIPDB. Highlights Indicators of Compromise (IPs, Domains, Hashes, URLs), parses defanged indicators, and delivers real-time threat intelligence inline.
 
 <br />
 
 [![Manifest V3](https://img.shields.io/badge/MANIFEST-V3-111111?style=for-the-badge&logo=googlechrome&logoColor=white)](manifest.json)
 [![Chrome / Edge / Brave](https://img.shields.io/badge/CHROME%20%2F%20EDGE%20%2F%20BRAVE-MV3%20EXTENSION-3B82F6?style=for-the-badge&logo=googlechrome&logoColor=white)](#install-load-unpacked)
 [![VirusTotal API v3](https://img.shields.io/badge/VIRUSTOTAL-API%20V3-2563EB?style=for-the-badge&logo=virustotal&logoColor=white)](https://virustotal.com)
-[![Vanilla JS](https://img.shields.io/badge/VANILLA-JS-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](#development--file-structure)
-[![Dependencies None](https://img.shields.io/badge/DEPENDENCIES-NONE-10B981?style=for-the-badge)](#features)
-[![Release v2.0.0](https://img.shields.io/badge/RELEASE-V2.0.0-8B5CF6?style=for-the-badge&logo=github&logoColor=white)](#github-release-system)
+[![IPInfo.io](https://img.shields.io/badge/IPINFO-GEO%20%26%20ISP-00E5FF?style=for-the-badge)](https://ipinfo.io)
+[![AbuseIPDB](https://img.shields.io/badge/ABUSEIPDB-REPUTATION-FFC107?style=for-the-badge)](https://abuseipdb.com)
+[![Release v3.0.0](https://img.shields.io/badge/RELEASE-V3.0.0-8B5CF6?style=for-the-badge&logo=github&logoColor=white)](#github-release-system)
 [![License GPL-3.0](https://img.shields.io/badge/LICENSE-GPL--3.0-000000?style=for-the-badge)](LICENSE)
 
 ---
