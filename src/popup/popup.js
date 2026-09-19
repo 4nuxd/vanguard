@@ -286,11 +286,29 @@ document.addEventListener('DOMContentLoaded', () => {
   async function searchLookup(q) {
     const vt = await vtQuery(q);
     if (!vt || vt.error) {
-      searchResults.innerHTML = `<div style="padding:12px;color:#ff80ab;font-weight:600;">${vt?.error || 'No response from VirusTotal'}</div>`;
+      const isMissingKey = vt?.error && vt.error.toLowerCase().includes('key');
+      if (isMissingKey) {
+        searchResults.innerHTML = `
+          <div style="padding:12px;background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);border-radius:10px;color:#ff80ab;font-weight:600;font-size:12px;">
+            <div>⚠️ VirusTotal API Key Required</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:4px;font-weight:400;">Please configure your VirusTotal API key in the settings panel.</div>
+            <button id="searchOpenSettings" class="btn btn-secondary" style="margin-top:8px;font-size:10px;padding:4px 10px;">⚙️ Open Settings</button>
+          </div>
+        `;
+        const openBtn = document.getElementById('searchOpenSettings');
+        if (openBtn) {
+          openBtn.addEventListener('click', () => {
+            if (panel) panel.classList.add('show');
+          });
+        }
+      } else {
+        searchResults.innerHTML = `<div style="padding:12px;color:#ff80ab;font-weight:600;font-size:12px;">${esc(vt?.error || 'No response from VirusTotal')}</div>`;
+      }
       searchResults.style.display = 'block';
       return;
     }
     renderThreatResults([{ ioc: q, ts: Date.now(), data: vt }]);
+    loadRecent();
   }
 
   // Render Full Enriched Threat Details in Quick Search Dropdown

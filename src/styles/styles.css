@@ -200,7 +200,7 @@ html, body {
 }
 
 /* Search Bar */
-.search-wrap { position: relative; margin-bottom: 12px; z-index: 1; }
+.search-wrap { position: relative; margin-bottom: 12px; z-index: 1000; }
 .search-input-icon {
   position: absolute;
   left: 14px;
@@ -229,12 +229,12 @@ html, body {
   background: rgba(0, 0, 0, 0.65);
 }
 
-/* Search Dropdown */
+/* Search Dropdown / Results Card */
 .search-results {
   display: none;
-  position: absolute;
-  top: 48px;
-  left: 0; right: 0;
+  position: relative;
+  margin-top: 8px;
+  margin-bottom: 12px;
   background: rgba(14, 14, 18, 0.98);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
@@ -242,10 +242,10 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-top: 1px solid rgba(255, 255, 255, 0.45);
   padding: 12px;
-  z-index: 99999;
+  z-index: 1000;
   max-height: 380px;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
 }
 
 /* Shimmer */
