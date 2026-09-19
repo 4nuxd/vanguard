@@ -371,7 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       ` : '';
 
-      const abuseBtnHtml = s.abuseUrl ? `<button class="btn btn-secondary btn-abuse" data-url="${esc(s.abuseUrl)}">AbuseIPDB</button>` : '';
+      const isIp = s.type === 'ip' || /^(?:\d{1,3}\.){3}\d{1,3}$/.test(e.ioc);
+      const abuseUrl = s.abuseUrl || (isIp ? `https://www.abuseipdb.com/check/${encodeURIComponent(e.ioc)}` : null);
+      const abuseBtnHtml = abuseUrl ? `<button class="btn btn-secondary btn-abuse" data-url="${esc(abuseUrl)}">AbuseIPDB</button>` : '';
 
       const card = document.createElement('div');
       card.className = 'result-card-full';

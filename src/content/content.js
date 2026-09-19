@@ -235,10 +235,13 @@
 
     // Enriched Network, Whois & AbuseIPDB Details
     let networkDetailsHtml = '';
-    if (data.asn) networkDetailsHtml += `<div class="vt-row"><span>ASN / Owner:</span><strong>${escapeAttr(data.asn)}</strong></div>`;
-    if (data.location) networkDetailsHtml += `<div class="vt-row"><span>Location:</span><strong>${escapeAttr(data.location)}</strong></div>`;
-    if (data.registrar) networkDetailsHtml += `<div class="vt-row"><span>Registrar:</span><strong>${escapeAttr(data.registrar)}</strong></div>`;
-    if (data.country && !data.location) networkDetailsHtml += `<div class="vt-row"><span>Country:</span><strong>${escapeAttr(data.country)}</strong></div>`;
+    if (data.location) networkDetailsHtml += `<div class="vt-row"><span>📍 Location:</span><strong>${escapeAttr(data.location)}</strong></div>`;
+    if (data.asn) networkDetailsHtml += `<div class="vt-row"><span>🌐 ASN / Owner:</span><strong>${escapeAttr(data.asn)}</strong></div>`;
+    if (data.registrar) networkDetailsHtml += `<div class="vt-row"><span>🏛 Registrar:</span><strong>${escapeAttr(data.registrar)}</strong></div>`;
+    if (data.country && !data.location) networkDetailsHtml += `<div class="vt-row"><span>🏳 Country:</span><strong>${escapeAttr(data.country)}</strong></div>`;
+    if (data.abuseScore !== null && data.abuseScore !== undefined) {
+      networkDetailsHtml += `<div class="vt-row"><span>🛡 AbuseIPDB Score:</span><strong style="color:#ffab00">${data.abuseScore}% (${data.abuseReports || 0} reports)</strong></div>`;
+    }
     if (data.reputation !== null && data.reputation !== undefined) {
       const repColor = data.reputation < 0 ? '#ff6b6b' : (data.reputation > 0 ? '#69f0ae' : '#ffffff');
       networkDetailsHtml += `<div class="vt-row"><span>Community Rep:</span><strong style="color:${repColor}">${data.reputation > 0 ? '+' : ''}${data.reputation}</strong></div>`;
@@ -251,8 +254,11 @@
       ? `<div class="vt-tags">${data.tags.map(t => `<span class="vt-tag">${escapeAttr(t)}</span>`).join('')}</div>`
       : '';
 
-    const abuseBtnHtml = data.abuseUrl
-      ? `<button class="vt-btn vt-abuse" data-url="${escapeAttr(data.abuseUrl)}">AbuseIPDB</button>`
+    // Always build AbuseIPDB URL for IP IOCs even if cached earlier
+    const isIp = data.type === 'ip' || /^(?:\d{1,3}\.){3}\d{1,3}$/.test(ioc);
+    const abuseUrl = data.abuseUrl || (isIp ? `https://www.abuseipdb.com/check/${encodeURIComponent(ioc)}` : null);
+    const abuseBtnHtml = abuseUrl
+      ? `<button class="vt-btn vt-abuse" data-url="${escapeAttr(abuseUrl)}">AbuseIPDB</button>`
       : '';
 
     tooltipEl.innerHTML = `
